@@ -3,65 +3,153 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Privacy Policy & Terms of Service</title>
+  <title>Pelicash Development Log</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
       line-height: 1.6;
-      max-width: 800px;
+      color: #333;
+      max-width: 900px;
       margin: 2rem auto;
       padding: 1rem;
+      background-color: #f9f9f9;
     }
-    h1, h2 {
-      color: #333;
+    h1, h2, h3 {
+      color: #2c3e50;
     }
-    a {
-      color: #007acc;
+    h1 {
+      text-align: center;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 0.5em;
+      margin-bottom: 1em;
+    }
+    h2 {
+      margin-top: 1.5em;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 0.3em;
+    }
+    ul {
+      padding-left: 20px;
+      margin-bottom: 1em;
+    }
+    li {
+      margin-bottom: 0.5em;
+    }
+    code {
+      background-color: #eef;
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .conclusion {
+      margin-top: 2em;
+      padding-top: 1em;
+      border-top: 1px solid #e0e0e0;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
-  <h1>Privacy Policy</h1>
-  <p>Effective Date: June 4, 2025</p>
-  <p>
-    This app (“we”, “us”, or “our”) respects your privacy. We do not collect or store any personally identifiable information unless explicitly stated.
-  </p>
-  <p>
-    We may use third-party services such as RevenueCat for in-app purchases. These services may collect limited data as described in their respective privacy policies.
-  </p>
-  <p>
-    By using the app, you agree to the collection and use of information in accordance with this policy.
-  </p>
+  <div class="container">
+    <h1>Pelicash Development Log</h1>
 
-  <h2>Data Collected</h2>
-  <ul>
-    <li>No personal data is collected directly by us.</li>
-    <li>Third-party services like RevenueCat may process anonymized purchase data.</li>
-  </ul>
+    <h2>1. Initial Bug Fixes &amp; Feature Implementations</h2>
+    <ul>
+      <li><strong>Cashback Rate Display:</strong> Fixed an issue where cashback rates reset to 0% on refresh by ensuring the UI used updated data.</li>
+      <li><strong>WebView Cookie Persistence:</strong> Resolved captcha re-prompts by using <code>WebViewCookieManager</code> to persist HttpOnly cookies.</li>
+      <li><strong>RevenueCat Paywall V2 Integration:</strong>
+        <ul>
+          <li>Replaced a custom premium screen with RevenueCat Paywall V2.</li>
+          <li>Troubleshot and fixed several Android-specific errors:
+            <ul>
+              <li><code>FlutterFragmentActivity</code> requirement: Changed <code>MainActivity</code>'s parent class.</li>
+              <li>"Purchases not configured": Added <code>Purchases.configure()</code>.</li>
+              <li><code>OnBackInvokedCallback</code> warning: Updated <code>AndroidManifest.xml</code>.</li>
+              <li>"No products registered": Guided user to configure products in RevenueCat dashboard.</li>
+              <li><code>PaywallResult</code> not exhaustively matched: Added <code>PaywallResult.notPresented</code> case.</li>
+            </ul>
+          </li>
+          <li>Addressed pricing display issues (USD instead of AUD) by guiding the user to localize pricing in App Store Connect.</li>
+          <li>Provided hex/RGB codes for UI customization of the paywall.</li>
+        </ul>
+      </li>
+    </ul>
 
-  <h2>Third-Party Services</h2>
-  <p>
-    Please review the privacy policies of our third-party providers:
-  </p>
-  <ul>
-    <li><a href="https://www.revenuecat.com/privacy" target="_blank">RevenueCat Privacy Policy</a></li>
-  </ul>
+    <h2>2. Google Play Store Upload &amp; Beta Testing</h2>
+    <p>The user aimed to upload the app for beta testing and set up subscriptions.</p>
+    <h3>Process &amp; Issues:</h3>
+    <ul>
+      <li>Built a release app bundle (<code>flutter build appbundle --release</code>).</li>
+      <li>Encountered an error: "You uploaded an APK or Android App Bundle that was signed in debug mode."
+        <ul>
+          <li>The assistant guided the user through creating a release signing key using <code>keytool</code>, which involved installing <code>openjdk@11</code> via Homebrew and setting the PATH.</li>
+          <li>Helped create <code>android/key.properties</code> and update <code>android/app/build.gradle.kts</code> for release signing, including adding necessary Java imports.</li>
+          <li>Resolved a persistent issue with a trailing space in the <code>storeFile</code> path in <code>key.properties</code> by recreating the file using <code>echo -e</code>.</li>
+        </ul>
+      </li>
+      <li>Encountered an error: "Version code 1 has already been used."
+        <ul>
+          <li>Fixed by incrementing <code>versionCode</code> in <code>pubspec.yaml</code> and rebuilding.</li>
+        </ul>
+      </li>
+      <li>Addressed a Play Console warning about missing testers by guiding the user to set up Open Testing.</li>
+    </ul>
 
-  <h2>Changes</h2>
-  <p>
-    We may update this policy occasionally. Changes will be posted on this page.
-  </p>
+    <h2>3. UI Adjustments - Bottom Sheet Height</h2>
+    <ul>
+      <li><strong>Cashback Details Bottom Sheet (<code>DraggableScrollableSheet</code>):</strong> Increased <code>initialChildSize</code> and <code>minChildSize</code> to make it appear higher on Android.</li>
+      <li><strong>Notification Alert Creation Bottom Sheet (<code>_cashbackBottomSheet</code>):</strong> Fixed its low height by setting a specific height for its main <code>Container</code>, changing its <code>Column</code>'s <code>mainAxisSize</code> to <code>MainAxisSize.max</code>, and wrapping children in a <code>SingleChildScrollView</code>.</li>
+    </ul>
 
-  <hr />
+    <h2>4. Android Cashback Notification Criteria Enhancement</h2>
+    <p>The user wanted to add a third condition for sending cashback notifications: Cashback rate is higher than the saved peak rate in the last 24 hours.</p>
+    <h3>Implementation Steps &amp; Challenges:</h3>
+    <ul>
+      <li>The assistant identified that <code>NotificationItem</code> needed new fields: <code>peak24hRate</code> (double) and <code>lastPeakTime</code> (DateTime?).</li>
+      <li>Initially, there were difficulties modifying <code>NotificationItem</code> directly in <code>lib/main.dart</code> due to file corruption issues that arose during previous edits.</li>
+      <li><strong>Solution Adopted:</strong>
+        <ol>
+          <li>A new file <code>lib/notification_item.dart</code> was created to house the <code>NotificationItem</code> class with the new fields and updated <code>toJson</code>/<code>fromJson</code> methods (ensuring <code>snake_case</code> for Supabase compatibility in <code>toJson</code>).</li>
+          <li><code>lib/notification_service.dart</code> was updated to:
+            <ul>
+              <li>Import <code>NotificationItem</code> from the new file.</li>
+              <li>Modify <code>_shouldSendNotification</code> to include the 24-hour peak logic:
+                <ul>
+                  <li>Rate &ge; threshold.</li>
+                  <li>Rate is different from <code>lastCashbackPercentage</code> (unless first notification).</li>
+                  <li>Rate is higher than <code>peak24hRate</code> (if <code>lastPeakTime</code> is within 24 hours).</li>
+                </ul>
+              </li>
+              <li>Modify <code>_updateLastNotificationData</code> to also update <code>peak24hRate</code> and <code>lastPeakTime</code> in SharedPreferences when a notification is sent.</li>
+            </ul>
+          </li>
+          <li>The user confirmed they manually fixed the corruption in <code>lib/main.dart</code>, which involved:
+            <ul>
+              <li>Importing <code>NotificationItem</code> from <code>lib/notification_item.dart</code>.</li>
+              <li>Removing the old, corrupted inline <code>NotificationItem</code> class definition.</li>
+              <li>Ensuring <code>_NotificationPageState</code> methods (like <code>_loadIOSNotifications</code>, <code>_addIOSCashbackAlert</code>) correctly use the imported <code>NotificationItem</code>.</li>
+            </ul>
+          </li>
+        </ol>
+      </li>
+      <li>A subsequent linter error ("The name 'NotificationItem' is defined in the libraries 'package:pelicash/main.dart' and 'package:pelicash/notification_item.dart'") indicated a duplicate definition still existed. The assistant advised the user to manually remove the <code>NotificationItem</code> class definition from <code>lib/main.dart</code>, leaving it only in <code>lib/notification_item.dart</code>.</li>
+    </ul>
 
-  <h1>Terms of Service</h1>
-  <p>
-    By using this app, you agree to comply with these terms. This app is provided “as is” without warranties of any kind. We are not liable for any damages or losses related to the use of the app.
-  </p>
-  <p>
-    Subscriptions and purchases are managed via the App Store or Google Play and are subject to their terms.
-  </p>
+    <h2>5. Play Store Listing Information</h2>
+    <ul>
+      <li>The assistant provided suggestions for the "Short description" (max 80 characters) and a detailed "Full Description" for the Pelicash app on the Google Play Store.</li>
+      <li>The assistant then drafted a more comprehensive Privacy Policy based on the app's features (no account registration, use of Supabase for FCM/iOS alerts, RevenueCat for IAP, Google Mobile Ads, SharedPreferences, WorkManager, Device ID for notifications) and <code>pubspec.yaml</code> dependencies.</li>
+    </ul>
 
-  <p>If you have questions, contact us at <a href="mailto:support@yourdomain.com">support@yourdomain.com</a>.</p>
+    <div class="conclusion">
+      <p>The conversation concluded with the user indicating they had fixed the file corruption issues and the assistant confirming the Android notification logic should now be correct based on the 3-point criteria. The next step was likely testing.</p>
+    </div>
+  </div>
 </body>
 </html>
